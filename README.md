@@ -2,88 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>OpenSU | Professional Root Toolchain</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSU | Modern Root Toolchain</title>
     <style>
-        body { background: #0d1117; color: #c9d1d9; font-family: 'Courier New', monospace; padding: 40px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 30px; width: 100%; max-width: 550px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        h1 { color: #58a6ff; font-size: 2.5rem; margin: 0; }
-        .tagline { color: #8b949e; font-size: 12px; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .btn { display: block; width: 100%; padding: 18px; margin: 15px 0; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; text-transform: uppercase; font-size: 14px; }
-        .btn-download { background: #238636; color: white; }
-        .btn-install { background: #21262d; color: #58a6ff; border: 1px solid #30363d; }
-        .terminal { background: #000; color: #39ff14; padding: 15px; border-radius: 4px; height: 180px; overflow-y: auto; font-size: 12px; margin-top: 20px; border: 1px solid #333; }
+        /* SITE DESIGN: MODERN & CLEAN (English) */
+        :root { --accent: #2196F3; --bg: #0a0a0a; --card: #141414; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        .hero { text-align: center; padding: 40px; background: var(--card); border: 1px solid #333; border-radius: 16px; width: 90%; max-width: 450px; }
+        h1 { font-size: 3rem; margin: 0; color: var(--accent); letter-spacing: -2px; }
+        .tag { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; display: block; }
+        .btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
+        .btn { padding: 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; transition: 0.3s; font-size: 14px; }
+        .btn-zip { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3); }
+        .btn-patch { background: #222; color: #fff; border: 1px solid #444; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .console { background: #000; color: #00ff00; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 11px; margin-top: 25px; text-align: left; border: 1px solid #222; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>OpenSU</h1>
-    <div class="tagline">SYSTEMLESS ROOT ENGINE | CORE: BINARY SU</div>
+    <div class="hero">
+        <h1>OpenSU</h1>
+        <span class="tag">Systemless Engine for GALE</span>
+        
+        <div class="btn-group">
+            <a href="OpenSU.zip" class="btn btn-zip">DOWNLOAD OPENSU ZIP</a>
+            
+            <button class="btn btn-patch" onclick="runSimulation()">INITIALIZE ROOT PATCH</button>
+        </div>
 
-    <a href="OpenSU.zip" class="btn btn-download">Download OpenSU.zip</a>
-
-    <button class="btn btn-install" onclick="runMotor()">Install / Patch Engine</button>
-
-    <div class="terminal" id="console">
-        [#] OpenSU environment initialized.<br>
-        [#] Waiting for GALE boot.img...<br>
+        <div class="console" id="log">
+            [#] Ready to patch Redmi 13C (gale)...
+        </div>
     </div>
-</div>
 
 <script>
-    /* ESTE É O MOTOR REAL (SHELL SCRIPT) 
-       Copie o conteúdo desta variável para o arquivo 'update-binary' dentro do ZIP
+    /* O MOTOR QUE VAI DENTRO DO ZIP (SCRIPT PARA O RECOVERY)
+       Este código abaixo é o que aparece no celular quando a pessoa liga 
+       segurando os botões e instala o ZIP.
     */
-    const shellMotorScript = `
-#!/sbin/sh
-# OPENSU CORE ENGINE - UPDATE-BINARY
-BOOT_DEV="/dev/block/by-name/boot"
-
-ui_print "- OpenSU: Initializing Engine..."
-# Unpack using magiskboot tool
-./magiskboot unpack $BOOT_DEV
-
-ui_print "- OpenSU: Injecting SU binary..."
-# The 'su' binary is the motor that grants root
-./magiskboot cpio ramdisk.cpio \\
-    "add 0755 bin/su common/su" \\
-    "patch"
-
-ui_print "- OpenSU: Repacking kernel..."
-./magiskboot repack $BOOT_DEV new-boot.img
-dd if=new-boot.img of=$BOOT_DEV
-
-ui_print "- OpenSU: Success! Root activated."
+    const OpenSU_Recovery_Engine = `
+    #!/sbin/sh
+    # ---------------------------------------
+    # OPENSU RECOVERY INSTALLER - ALL IN ENGLISH
+    # ---------------------------------------
+    ui_print " "
+    ui_print "---------------------------------------"
+    ui_print "      OPENSU - ROOT INSTALLER v1.0     "
+    ui_print "---------------------------------------"
+    ui_print "- Device: Gale (Redmi 13C)"
+    ui_print "- Toolchain: Binary SU Engine"
+    
+    # Injetando o motor original
+    ui_print "- Unpacking Boot Partition..."
+    ./magiskboot unpack /dev/block/by-name/boot
+    
+    ui_print "- Patching Kernel with SU tools..."
+    ./magiskboot cpio ramdisk.cpio "add 0755 bin/su common/su" "patch"
+    
+    ui_print "- Flashing Patched Kernel..."
+    ./magiskboot repack /dev/block/by-name/boot new-boot.img
+    dd if=new-boot.img of=/dev/block/by-name/boot
+    
+    ui_print "---------------------------------------"
+    ui_print "       SUCCESS: OPENSU INSTALLED       "
+    ui_print "---------------------------------------"
+    ui_print "- Rebooting to System..."
     `;
 
-    function runMotor() {
-        const consoleLog = document.getElementById('console');
-        const tasks = [
-            "> Starting OpenSU Toolchain...",
-            "> Analyzing Kernel Partitions...",
-            "> Loading SU Binary (Motor)...",
-            "> Patching Ramdisk via magiskboot...",
-            "> Rebuilding Boot Image...",
-            "<b>> SUCCESS: OpenSU Engine Injected!</b>"
-        ];
-
-        let i = 0;
-        const timer = setInterval(() => {
-            if (i < tasks.length) {
-                consoleLog.innerHTML += `<div>${tasks[i]}</div>`;
-                i++;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-            } else {
-                clearInterval(timer);
-                console.log("Flashable Script Code:", shellMotorScript);
-            }
-        }, 800);
+    function runSimulation() {
+        const log = document.getElementById('log');
+        log.innerHTML += "<br>> Starting OpenSU Toolchain...";
+        setTimeout(() => {
+            log.innerHTML += "<br>> Processing Boot Image...";
+            log.innerHTML += "<br>> <span style='color:white'>Done! Now Flash the ZIP in Recovery.</span>";
+            console.log("Motor para o ZIP:", OpenSU_Recovery_Engine);
+        }, 1500);
     }
 </script>
-
-<footer style="margin-top:20px; font-size:10px; color:#444;">
-    OPENSU PROJECT | POWERED BY ORIGINAL BINARY SU | 2026
-</footer>
 
 </body>
 </html>
