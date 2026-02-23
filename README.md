@@ -2,119 +2,117 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>OpenSU Project | Root Toolchain</title>
+    <title>OpenSU Project | Root Environment</title>
     <style>
-        :root { --blue: #0070f3; --bg: #000; --green: #00ff41; --red: #ff0000; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        :root { --accent: #0070f3; --bg: #000; --green: #00ff41; --red: #ff0000; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
         
-        /* MODERN WEBSITE */
-        .container { width: 90%; max-width: 450px; text-align: center; background: #0a0a0a; border: 1px solid #222; padding: 40px; border-radius: 20px; box-shadow: 0 0 30px rgba(0,112,243,0.1); }
-        h1 { font-size: 2.5rem; margin: 0; background: linear-gradient(to right, #0070f3, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .upload-area { border: 2px dashed #333; margin: 30px 0; padding: 50px 20px; border-radius: 15px; cursor: pointer; position: relative; }
-        .upload-area:hover { border-color: var(--blue); background: #111; }
+        /* WEB INTERFACE */
+        .web-panel { width: 90%; max-width: 450px; text-align: center; background: #0a0a0a; border: 1px solid #222; padding: 40px; border-radius: 20px; box-shadow: 0 0 30px rgba(0,112,243,0.1); }
+        h1 { font-size: 2.2rem; margin: 0; font-weight: 900; }
+        .upload-slot { border: 2px dashed #333; margin: 30px 0; padding: 50px 20px; border-radius: 12px; cursor: pointer; position: relative; }
+        .upload-slot:hover { border-color: var(--accent); }
         input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         
-        /* NOTICES */
-        #check-status { display: none; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 10px; }
-        .yes { border: 1px solid var(--green); color: var(--green); background: rgba(0,255,65,0.1); }
-        .no { border: 1px solid var(--red); color: var(--red); background: rgba(255,0,0,0.1); }
+        /* STATUS & REBOOT */
+        #check-box { display: none; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 15px; }
+        .valid { border: 1px solid var(--green); color: var(--green); background: rgba(0,255,65,0.05); }
+        .invalid { border: 1px solid var(--red); color: var(--red); background: rgba(255,0,0,0.05); }
 
-        /* RECOVERY INTERFACE (OPENSU PROJECT) */
-        #opensu-recovery { display: none; position: fixed; inset: 0; background: #000; flex-direction: column; padding: 30px; z-index: 9999; }
-        .recovery-header { border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-bottom: 20px; }
-        .search-box { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 20px; outline: none; }
-        .search-box:focus { border-color: var(--blue); }
-        .file-list { flex-grow: 1; border: 1px solid #222; border-radius: 8px; overflow-y: auto; background: #050505; }
-        .file-item { padding: 15px; border-bottom: 1px solid #111; display: flex; justify-content: space-between; cursor: pointer; font-family: monospace; }
-        .file-item:hover { background: #111; color: var(--blue); }
-        .install-btn { width: 100%; padding: 20px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: pointer; margin-top: 20px; }
+        /* BOOT INTERFACE (OPENSU PROJECT) */
+        #boot-screen { display: none; position: fixed; inset: 0; background: #000; flex-direction: column; padding: 30px; z-index: 10000; }
+        .recovery-title { color: var(--accent); font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 20px; letter-spacing: 2px; }
+        .search-area { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 20px; }
+        .file-scroller { flex-grow: 1; border: 1px solid #222; border-radius: 8px; overflow-y: auto; background: #050505; }
+        .file-node { padding: 18px; border-bottom: 1px solid #111; cursor: pointer; display: flex; justify-content: space-between; font-family: monospace; }
+        .file-node:hover { background: #111; color: var(--accent); }
+        .action-btn { width: 100%; padding: 20px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+        .install-box { display: none; flex-direction: column; flex-grow: 1; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="site-ui">
+    <div class="web-panel" id="web-site">
         <h1>OpenSU</h1>
-        <p style="color:#666; font-size: 12px; text-transform: uppercase;">Kernel Validation System</p>
+        <p style="color:#555; font-size: 11px;">VERIFYING GALE_GLOBAL COMPATIBILITY</p>
         
-        <div class="upload-area">
-            <p id="label">Place the file here</p>
-            <input type="file" id="file-input" onchange="validateAndReboot()">
+        <div class="upload-slot">
+            <p id="label-text">Place the file here</p>
+            <input type="file" id="file-trigger" onchange="startCheck()">
         </div>
 
-        <div id="check-status"></div>
+        <div id="check-box"></div>
     </div>
 
-    <div id="opensu-recovery">
-        <div class="recovery-header">
-            <h2 style="margin:0; letter-spacing: 2px;">OPENSU PROJECT</h2>
-            <span style="font-size: 10px; color: #555;">ROOT ENGINE v1.0 | BY topjohnwu tools</span>
-        </div>
+    <div id="boot-screen">
+        <div class="recovery-title">OPENSU PROJECT</div>
+        
+        <button class="action-btn" id="pre-install" onclick="openFileSelector()">INSTALL</button>
 
-        <button class="install-btn" id="main-install-btn" onclick="showExplorer()">INSTALL</button>
-
-        <div id="explorer-ui" style="display:none; flex-direction: column; flex-grow: 1; margin-top: 20px;">
-            <input type="text" class="search-box" id="search" placeholder="Search file to patch...">
-            <div class="file-list" id="list">
-                <div class="file-item">gale_global_stock.img <span>(Compatible)</span></div>
-                <div class="file-item">gale_global_patched.zip <span>(Ready)</span></div>
-                <div class="file-item">Download/root_motor.zip <span>(Engine)</span></div>
-                <div class="file-item">DCIM/backup_kernel.img <span>(Backup)</span></div>
-                <div class="file-item">TWRP/config.ini <span>(System)</span></div>
+        <div class="install-box" id="selector-box">
+            <input type="text" class="search-area" id="search-input" placeholder="Search for file to root...">
+            <div class="file-scroller" id="file-list">
+                <div class="file-node">gale_global_v14.img <span>(COMPATIBLE)</span></div>
+                <div class="file-node">boot_patched.zip <span>(ENGINE)</span></div>
+                <div class="file-node">Download/root_script.zip <span>(READY)</span></div>
+                <div class="file-node">stock_kernel.img <span>(UNPATCHED)</span></div>
             </div>
         </div>
     </div>
 
     <script>
-        function validateAndReboot() {
-            const file = document.getElementById('file-input').files[0];
-            const status = document.getElementById('check-status');
-            const label = document.getElementById('label');
+        function startCheck() {
+            const file = document.getElementById('file-trigger').files[0];
+            const box = document.getElementById('check-box');
+            const label = document.getElementById('label-text');
             
             if (!file) return;
 
-            status.style.display = "block";
-            // Valida se o arquivo tem 'gale_global' no nome
+            box.style.display = "block";
+            // Verifica se o arquivo é gale_global para ativar o Root
             if (file.name.toLowerCase().includes("gale_global")) {
-                status.className = "yes";
-                status.innerHTML = "ROOT COMPATIBLE: YES<br>Turn off or Restart your device now.";
-                label.innerText = "FILE ACCEPTED";
-                
-                // Simula o desligar/ligar (Reboot)
+                box.className = "valid";
+                box.innerHTML = "ROOT COMPATIBLE: YES<br>Please turn off your device or restart now.";
+                label.innerText = "VERIFIED";
+
+                // Simula o celular desligando e ligando (Boot)
                 setTimeout(() => {
-                    document.body.style.background = "#000";
-                    document.getElementById('site-ui').style.display = 'none';
+                    document.getElementById('web-site').style.display = 'none';
+                    document.body.style.background = "#000"; // Tela apaga
                     
                     setTimeout(() => {
-                        document.getElementById('opensu-recovery').style.display = 'flex';
-                    }, 2000); // Tempo do celular "ligando"
-                }, 4000);
+                        document.getElementById('boot-screen').style.display = 'flex';
+                    }, 2500); // Celular "ligando" com a tela do projeto
+                }, 5000);
 
             } else {
-                status.className = "no";
-                status.innerHTML = "ROOT COMPATIBLE: NO<br>Invalid file for Gale Global.";
-                label.innerText = "REFUSED";
+                box.className = "invalid";
+                box.innerHTML = "ROOT COMPATIBLE: NO<br>Invalid kernel file.";
+                label.innerText = "REJECTED";
             }
         }
 
-        function showExplorer() {
-            document.getElementById('main-install-btn').style.display = 'none';
-            document.getElementById('explorer-ui').style.display = 'flex';
+        function openFileSelector() {
+            // Quando clica no botão Install, abre a busca e os arquivos
+            document.getElementById('pre-install').style.display = 'none';
+            document.getElementById('selector-box').style.display = 'flex';
         }
 
-        // Search Bar Logic
-        document.getElementById('search').addEventListener('input', function(e) {
+        // Sistema de busca nos arquivos
+        document.getElementById('search-input').addEventListener('input', function(e) {
             let filter = e.target.value.toLowerCase();
-            let items = document.querySelectorAll('.file-item');
-            items.forEach(item => {
-                item.style.display = item.innerText.toLowerCase().includes(filter) ? "flex" : "none";
+            let nodes = document.querySelectorAll('.file-node');
+            nodes.forEach(node => {
+                node.style.display = node.innerText.toLowerCase().includes(filter) ? "flex" : "none";
             });
         });
 
-        // Clique no arquivo para "Instalar"
-        document.querySelectorAll('.file-item').forEach(item => {
-            item.onclick = function() {
-                alert("OPENSU PROJECT: Patching " + this.innerText.split(' ')[0] + " using su binary...");
-                alert("INSTALL SUCCESSFUL!");
+        // Simulação de clique no arquivo para dar Root
+        document.querySelectorAll('.file-node').forEach(node => {
+            node.onclick = function() {
+                const name = this.innerText.split(' ')[0];
+                alert("OPENSU PROJECT: Patching kernel " + name + "...");
+                alert("ROOT INSTALLED SUCCESSFULLY!");
                 location.reload();
             };
         });
