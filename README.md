@@ -3,104 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenSU Project | Kernel Toolchain</title>
+    <title>OpenSU Project | Universal Toolchain</title>
     <style>
-        :root { --blue: #0070f3; --bg: #000; --card: #111; --text: #eaeaea; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        :root { --accent: #0070f3; --bg: #000; --card: #111; --text: #eaeaea; --success: #00ff41; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
         
-        /* MODERN SITE DESIGN */
-        .container { width: 90%; max-width: 500px; background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; box-shadow: 0 0 50px rgba(0, 112, 243, 0.2); }
-        h1 { font-size: 2.5rem; margin: 0; background: linear-gradient(to right, #0070f3, #00dfd8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .step-info { color: #888; font-size: 14px; margin-bottom: 30px; text-transform: uppercase; }
+        /* MODERN INTERFACE */
+        .container { width: 90%; max-width: 450px; background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid #333; text-align: center; transition: 0.5s; }
+        h1 { font-size: 2.2rem; margin: 0; font-weight: 800; letter-spacing: -1px; color: #fff; }
+        .sub { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 30px; }
         
-        /* THE "PLACE THE FILE" BUTTON */
-        .upload-area { border: 2px dashed #444; padding: 30px; border-radius: 12px; cursor: pointer; transition: 0.3s; position: relative; }
-        .upload-area:hover { border-color: var(--blue); background: rgba(0, 112, 243, 0.05); }
+        /* UPLOAD BUTTON */
+        .upload-box { border: 2px dashed #444; padding: 40px; border-radius: 16px; cursor: pointer; position: relative; transition: 0.3s; }
+        .upload-box:hover { border-color: var(--accent); background: rgba(0, 112, 243, 0.05); }
+        .upload-box p { margin: 0; font-weight: 600; color: #888; }
         input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
 
-        /* RECOVERY INTERFACE (HIDDEN INITIALLY) */
-        #recovery-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        .search-bar { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #333; background: #111; color: white; margin-top: 20px; box-sizing: border-box; }
-        .file-list { flex-grow: 1; border: 1px solid #222; margin-top: 15px; border-radius: 8px; overflow-y: auto; text-align: left; }
-        .file-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
-        .file-item:hover { background: #1a1a1a; color: var(--blue); }
-        .install-btn { width: 100%; padding: 20px; background: var(--blue); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 18px; margin-top: 15px; cursor: pointer; }
+        /* RECOVERY/INSTALL SCREEN */
+        #recovery-ui { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; flex-direction: column; padding: 25px; box-sizing: border-box; }
+        .search-input { width: 100%; padding: 18px; border-radius: 12px; border: 1px solid #222; background: #0a0a0a; color: #fff; font-size: 16px; margin-top: 20px; outline: none; }
+        .search-input:focus { border-color: var(--accent); }
+        .file-browser { flex-grow: 1; border: 1px solid #222; margin-top: 20px; border-radius: 12px; overflow-y: auto; text-align: left; background: #050505; }
+        .file { padding: 18px; border-bottom: 1px solid #111; font-size: 14px; cursor: pointer; display: flex; align-items: center; }
+        .file:before { content: "📄"; margin-right: 12px; opacity: 0.5; }
+        .file:hover { background: #111; color: var(--accent); }
+        .install-btn { width: 100%; padding: 22px; background: var(--accent); color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 18px; margin-top: 20px; cursor: pointer; }
 
-        .loading-bar { height: 4px; width: 0%; background: var(--blue); position: fixed; top: 0; left: 0; transition: 0.5s; }
+        /* WARNING NOTIFICATION */
+        #reboot-notice { display: none; margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(0, 255, 65, 0.1); border: 1px solid var(--success); color: var(--success); font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <div id="loading" class="loading-bar"></div>
-
-    <div class="container" id="web-site">
-        <h1>OPENSU</h1>
-        <div class="step-info">Engine: Systemless SU Toolchain</div>
+    <div class="container" id="web-ui">
+        <h1>OpenSU</h1>
+        <div class="sub">Kernel Root Patcher</div>
         
-        <div class="upload-area">
-            <p id="upload-text">Place the file here</p>
-            <input type="file" id="boot-input" onchange="processFile()">
+        <div class="upload-box" id="drop-zone">
+            <p id="label-text">Place the file here</p>
+            <input type="file" id="file-input" onchange="checkFile()">
         </div>
-        <p style="font-size: 12px; color: #555; margin-top: 20px;">Upload your boot.img to inject OpenSU motor.</p>
+
+        <div id="reboot-notice">
+            <b>FILE VERIFIED!</b> Root is compatible.<br>
+            Please Reboot or Turn Off your device to continue.
+        </div>
     </div>
 
-    <div id="recovery-screen">
-        <h2 style="color: var(--blue); margin: 0;">OPENSU PROJECT</h2>
-        <p style="font-size: 10px; color: #888;">RECOVERY INSTALLER v1.0</p>
+    <div id="recovery-ui">
+        <h2 style="margin: 0; letter-spacing: -1px;">OPENSU PROJECT</h2>
+        <p style="font-size: 11px; color: #444; text-transform: uppercase;">Recovery Installation Mode</p>
         
-        <input type="text" class="search-bar" placeholder="Search files (.zip, .img)..." id="search">
+        <input type="text" class="search-input" placeholder="Search files..." id="search-box">
         
-        <div class="file-list" id="files">
-            <div class="file-item">opensu_patched_gale.zip</div>
-            <div class="file-item">boot_original.img</div>
-            <div class="file-item">Download/custom_mod.zip</div>
-            <div class="file-item">TWRP/backups/stock.img</div>
+        <div class="file-browser" id="file-list">
+            <div class="file">opensu_motor_v1.zip</div>
+            <div class="file">boot_gale_global.img</div>
+            <div class="file">recovery_backup.img</div>
+            <div class="file">Download/root_package.zip</div>
+            <div class="file">System/kernel_mod.img</div>
         </div>
 
-        <button class="install-btn" onclick="startInstall()">INSTALL</button>
+        <button class="install-btn" onclick="finishInstall()">INSTALL</button>
     </div>
 
     <script>
-        // Simulação do Motor e Processamento
-        function processFile() {
-            const input = document.getElementById('boot-input');
-            const text = document.getElementById('upload-text');
-            const loader = document.getElementById('loading');
+        function checkFile() {
+            const input = document.getElementById('file-input');
+            const label = document.getElementById('label-text');
+            const notice = document.getElementById('reboot-notice');
             
             if (input.files.length > 0) {
-                text.innerText = "Patching: " + input.files[0].name;
-                loader.style.width = "100%";
+                const fileName = input.files[0].name.toLowerCase();
                 
-                setTimeout(() => {
-                    alert("Patch Successful! Now reboot your device to OpenSU Recovery.");
-                    // Simula o "ligar e desligar" entrando na interface de instalação
-                    document.getElementById('web-site').style.display = 'none';
-                    document.getElementById('recovery-screen').style.display = 'flex';
-                }, 2500);
+                // VERIFICAÇÃO SE O ARQUIVO É COMPATÍVEL (Root compatible check)
+                if (fileName.includes("boot") || fileName.includes(".img") || fileName.includes(".zip")) {
+                    label.innerHTML = "FILE COMPATIBLE";
+                    label.style.color = "#00ff41";
+                    notice.style.display = "block";
+                    
+                    // Simula o tempo de "Reiniciar / Ligar de novo"
+                    setTimeout(() => {
+                        alert("Device is rebooting into OPENSU PROJECT...");
+                        document.getElementById('web-ui').style.display = 'none';
+                        document.getElementById('recovery-ui').style.display = 'flex';
+                    }, 4000);
+                } else {
+                    label.innerHTML = "INCOMPATIBLE FILE";
+                    label.style.color = "#ff4141";
+                    alert("This file cannot be used for Root.");
+                }
             }
         }
 
-        function startInstall() {
+        function finishInstall() {
             const btn = document.querySelector('.install-btn');
-            btn.innerText = "FLASHING SU MOTOR...";
-            btn.style.background = "#222";
+            btn.innerText = "PATCHING KERNEL...";
+            btn.style.background = "#111";
+            btn.style.color = "#555";
             
             setTimeout(() => {
-                alert("OPENSU PROJECT: Root Activated Successfully!");
-                location.reload();
-            }, 3000);
+                alert("OPENSU PROJECT: Install Successful! Root is active.");
+                window.location.reload();
+            }, 3500);
         }
 
-        // Lógica da Barra de Pesquisa
-        document.getElementById('search').addEventListener('input', function(e) {
+        // BARRA DE PESQUISA (Search Bar Logic)
+        document.getElementById('search-box').addEventListener('input', function(e) {
             let filter = e.target.value.toLowerCase();
-            let items = document.querySelectorAll('.file-item');
-            items.forEach(item => {
-                if(item.innerText.toLowerCase().includes(filter)) {
-                    item.style.display = "block";
-                } else {
-                    item.style.display = "none";
-                }
+            let files = document.querySelectorAll('.file');
+            files.forEach(f => {
+                f.style.display = f.innerText.toLowerCase().includes(filter) ? "flex" : "none";
             });
         });
     </script>
